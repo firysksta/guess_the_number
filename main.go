@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 type Difficulty struct {
@@ -10,36 +12,37 @@ type Difficulty struct {
 }
 
 func main() {
-	m := map[string]Difficulty{
-		"easy":        {0, 100},
-		"normal":      {0, 1000},
-		"dont normal": {0, 10000},
-		"unreal":      {-10000, 10000},
+	m := map[uint]Difficulty{
+		1: {0, 100},
+		2: {0, 1000},
+		3: {0, 10000},
+		4: {-10000, 10000},
 	}
 
-	fmt.Println("Приветствуем вас в увлекательной игре — Угадай Число!")
+	fmt.Println("Приветствую вас в увлекательной игре — Угадай Число!")
 
-	fmt.Printf("Уровни сложности:\n"+
-		"1) Легкий - от %d до %d\n"+
-		"2) Нормальный - от %d до %d\n"+
-		"3) Ненормальный - от %d до %d\n"+
-		"4) Нереальный - от %d до %d\n\n",
-		m["easy"].Value1, m["easy"].Value2,
-		m["normal"].Value1, m["normal"].Value2,
-		m["dont normal"].Value1, m["dont normal"].Value2,
-		m["unreal"].Value1, m["unreal"].Value2,
+	fmt.Printf("Уровни сложности: \n"+
+		"1) Легкий — от %d до %d\n"+
+		"2) Нормальный — от %d до %d\n"+
+		"3) Ненормальный — от %d до %d\n"+
+		"4) Нереальный — от %d до %d\n\n",
+		m[1].Value1, m[1].Value2,
+		m[2].Value1, m[2].Value2,
+		m[3].Value1, m[3].Value2,
+		m[4].Value1, m[4].Value2,
 	)
 
-	fmt.Println("Введите номер сложности:")
-	var diff = difficult()
-	go game(diff)
+	var diff = difficult(m)
+	game(diff, m)
 }
 
-func difficult() (scandiff uint) {
+func difficult(diffmap map[uint]Difficulty) (scandiff uint) {
+	diffcount := uint(len(diffmap))
+	fmt.Println("Введите номер сложности: ")
 	for {
 		_, err := fmt.Scan(&scandiff)
-		if err != nil || scandiff <= 0 || scandiff >= 5 {
-			fmt.Println("Введите номер сложности (от 1 до 4):")
+		if err != nil || scandiff <= 0 || scandiff > diffcount {
+			fmt.Printf("Введите номер сложности (от 1 до %d): ", diffcount)
 			continue
 		}
 		break
@@ -47,6 +50,56 @@ func difficult() (scandiff uint) {
 	return
 }
 
-func game(diff uint) {
-	//
+func game(diff uint, diffmap map[uint]Difficulty) {
+	var guess int
+	minNum, maxNum, randomNumber := generateNumber(diff, diffmap)
+
+	gameInfo(minNum, maxNum)
+
+gameLoop:
+	for {
+		_, err := fmt.Scan(&guess)
+		if err != nil {
+			fmt.Print("Вводите только числа! ")
+			gameInfo(minNum, maxNum)
+			continue
+		}
+		switch {
+		case guess < randomNumber:
+			fmt.Println("Загаданное число больше")
+		case guess > randomNumber:
+			fmt.Println("Загаданное число меньше")
+		case guess == randomNumber:
+			fmt.Println("Поздравляю! Вы угадали!")
+			break gameLoop
+		}
+	}
+
+	for {
+		fmt.Println("\nХотите сыграть еще раз? (y/n)")
+		var input string
+		fmt.Scanln(&input)
+		if input != "y" && input != "Y" && input != "yes" && input != "YES" {
+			break
+		}
+
+		diff = difficult(diffmap)
+
+		minNum, maxNum, randomNumber = generateNumber(diff, diffmap)
+		gameInfo(minNum, maxNum)
+		goto gameLoop
+	}
+}
+
+func generateNumber(diff uint, diffmap map[uint]Difficulty) (minNum, maxNum, randomNumber int) {
+	minNum = diffmap[diff].Value1
+	maxNum = diffmap[diff].Value2
+
+	rand.Seed(time.Now().UnixNano())
+	randomNumber = rand.Intn(maxNum-minNum) + minNum
+	return
+}
+
+func gameInfo(minNum, maxNum int) {
+	fmt.Printf("Угадайте число от %d до %d: \n", minNum, maxNum)
 }
