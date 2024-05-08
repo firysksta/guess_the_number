@@ -25,7 +25,7 @@ func main() {
 		"1) Легкий — от %d до %d\n"+
 		"2) Нормальный — от %d до %d\n"+
 		"3) Ненормальный — от %d до %d\n"+
-		"4) Нереальный — от %d до %d\n\n",
+		"4) Нереальный — от %d до %d\n",
 		m[1].Value1, m[1].Value2,
 		m[2].Value1, m[2].Value2,
 		m[3].Value1, m[3].Value2,
@@ -38,7 +38,7 @@ func main() {
 
 func difficult(diffmap map[uint]Difficulty) (scandiff uint) {
 	diffcount := uint(len(diffmap))
-	fmt.Println("Введите номер сложности: ")
+	fmt.Println("\nВведите номер сложности: ")
 	for {
 		_, err := fmt.Scan(&scandiff)
 		if err != nil || scandiff <= 0 || scandiff > diffcount {
